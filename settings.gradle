@@ -1,0 +1,2 @@
+include ':app', ':base', ':sw_dimen', ':lib_sw_dimen', ':aaa'
+rootProject.name='安卓架构'
