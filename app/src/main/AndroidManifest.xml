@@ -3,6 +3,7 @@
     package="com.example.arch">
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,10 +13,21 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--1px像素保活的服务-->
+        <service
+            android:name="com.example.arch.onepixel.OnePixelService"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":one_pixel_service">
+            <!--service保活的一种方式 提升service的优先级，1000是最高优先级，数字越高优先级越高-->
+            <intent-filter android:priority="1000"></intent-filter>
+        </service>
     </application>
 
 </manifest>

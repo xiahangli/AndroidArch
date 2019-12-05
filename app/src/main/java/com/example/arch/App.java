@@ -1,4 +1,6 @@
-package com.example.arch.app;
+package com.example.arch;
+
+import com.example.base.base.BaseApplication;
 
 /**
  * @User Xiahangli
