@@ -19,20 +19,25 @@
             </intent-filter>
         </activity>
 
-        <!--1px像素保活的服务-->
+        <!--1px像素保活的服务 todo 需要改成不同于默认进程（包名为名）的进程-->
         <service
             android:name="com.example.arch.onepixel.OnePixelService"
             android:enabled="true"
-            android:exported="false"
-            android:process=":one_pixel_service">
+            android:exported="false">
             <!--service保活的一种方式 提升service的优先级，1000是最高优先级，数字越高优先级越高-->
-            <intent-filter android:priority="1000"></intent-filter>
+            <intent-filter android:priority="1000">
+                <!-- 添加intent-filter需要配合action来处理-->
+                <action android:name="com.example.onepixel.OnePixelService"></action>
+            </intent-filter>
         </service>
 
-<!-- excludeFromRecents将activity从后台最近活动的界面删除       -->
+        <!-- excludeFromRecents将activity从后台最近活动的界面删除       -->
+        <!--        设置taskAffinity，配合launchMode使得OnePixelActivity在一个单独的任务组中存在-->
         <activity
+            android:name=".onepixel.OnePixelActivity"
             android:excludeFromRecents="true"
-            android:name=".onepixel.OnePixelActivity">
+            android:launchMode="singleTask"
+            android:taskAffinity="com.onepixel">
 
 
         </activity>
