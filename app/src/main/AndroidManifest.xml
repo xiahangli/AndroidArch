@@ -28,6 +28,14 @@
             <!--service保活的一种方式 提升service的优先级，1000是最高优先级，数字越高优先级越高-->
             <intent-filter android:priority="1000"></intent-filter>
         </service>
+
+<!-- excludeFromRecents将activity从后台最近活动的界面删除       -->
+        <activity
+            android:excludeFromRecents="true"
+            android:name=".onepixel.OnePixelActivity">
+
+
+        </activity>
     </application>
 
 </manifest>
