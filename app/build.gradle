@@ -29,6 +29,8 @@ dependencies {
     implementation rootProject.lib_constraint_layout
     testImplementation rootProject.lib_junit
     androidTestImplementation rootProject.lib_espresso_core
+    implementation rootProject.lib_appcompat
+    testImplementation rootProject.lib_junit_ext
 
 //    依赖的lib库
 //    api是被依赖的模块修改，所有模块都重新编译
