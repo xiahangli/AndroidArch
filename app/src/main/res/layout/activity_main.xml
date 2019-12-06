@@ -6,10 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+
+<!--    在华为手机上通过adb shell dumpsys SurfaceFinger看到
+        w=1440 h=2560 5.7inch  density=那么dp=
+
+-->
+    <ImageButton
+        android:layout_width="@dimen/dp_px_200"
+        android:layout_height="@dimen/dp_px_200"
         android:text="Hello World!"
+        android:textStyle="bold"
+        android:src="@mipmap/ic_launcher"
+        android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

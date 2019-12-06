@@ -46,6 +46,7 @@ public class OnePixelActivityManager  {
     public void startOnePixelActivity(Context context) {
         ObjectUtils.requireNonNull(context,"context is null");
         Intent intent = new Intent();
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);//开启新的任务栈
         intent.setClass(context, OnePixelActivity.class);
         context.startActivity(intent);
     }
