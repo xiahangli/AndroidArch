@@ -1,4 +1,4 @@
-package com.example.player;
+package com.example.player.core;
 
 import android.view.View;
 import android.widget.FrameLayout;
@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;
+import com.example.base.base.util.ObjectUtils;
 import com.example.player.R;
 import com.example.player.model.MediaObject;
 
@@ -33,7 +34,8 @@ public class VideoPlayerViewHolder extends RecyclerView.ViewHolder {
     }
 
 
-    public void onBind(MediaObject mediaObject, RequestManager requestManager) {
+    public void onBindViewHolder(MediaObject mediaObject, RequestManager requestManager) {
+        ObjectUtils.requireNonNull(requestManager,"RequestManager is null");
         this.requestManager = requestManager;
         parent.setTag(this);
         title.setText(mediaObject.getTitle());
