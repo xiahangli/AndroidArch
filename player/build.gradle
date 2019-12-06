@@ -1,0 +1,43 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.0"
+
+
+    defaultConfig {
+        minSdkVersion 17
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    resourcePrefix "player_"
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation rootProject.lib_exoplayer_dash
+    implementation rootProject.lib_exoplayer_ui
+    implementation rootProject.lib_constraint_layout
+    implementation rootProject.lib_exoplayer_core
+    implementation rootProject.lib_exoplayer_hls
+    implementation rootProject.lib_appcompat
+    implementation rootProject.lib_recyclerview
+    implementation rootProject.lib_glide
+    testImplementation rootProject.lib_junit
+
+    androidTestImplementation rootProject.lib_junit_ext
+    androidTestImplementation rootProject.lib_espresso_core
+}
