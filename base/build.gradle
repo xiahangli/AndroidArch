@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply from: 'upload_nexus.gradle'
 
 android {
     compileSdkVersion 29
@@ -35,4 +35,6 @@ dependencies {
     testImplementation rootProject.lib_junit
     androidTestImplementation rootProject.lib_junit_ext
     androidTestImplementation rootProject.lib_espresso_core
+//    添加测试检测工具checkerframework
+    compileOnly 'org.checkerframework:checker-qual:'+checkerframeworkVersion
 }
