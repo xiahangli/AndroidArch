@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+//导入constant脚本，并通过project.ext.minSdkVersion方式引入版本
+apply from: '../constants.gradle'
 
 android {
     compileSdkVersion 29
@@ -6,25 +8,38 @@ android {
 
 
     defaultConfig {
-        minSdkVersion 17
-        targetSdkVersion 29
+        minSdkVersion project.ext.minSdkVersion
+        targetSdkVersion project.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        //下面的配置会被打入aar,
+        // aar的接入方在构建过程时会使用的混淆规则
+        //
         consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            //用于构建aar的混淆规则
+            //aar在集成到app中的时候，proguard过程会将所有的混淆配置合在一起对所有的class进行处理
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions{//兼容java8语法
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     resourcePrefix "player_"
 
 }
+
+
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -36,8 +51,14 @@ dependencies {
     implementation rootProject.lib_appcompat
     implementation rootProject.lib_recyclerview
     implementation rootProject.lib_glide
+
     testImplementation rootProject.lib_junit
 
     androidTestImplementation rootProject.lib_junit_ext
     androidTestImplementation rootProject.lib_espresso_core
+
+
+    compileOnly 'org.checkerframework:checker-qual:'+checkerframeworkVersion
+
+    api project(':base')
 }

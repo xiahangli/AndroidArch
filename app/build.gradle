@@ -11,12 +11,20 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            //线上包开启混淆
+            minifyEnabled true
+            //压缩对齐
+            zipAlignEnabled true
+            //清除无用资源
+            shrinkResources true
+            //混淆脚本路径，取消默认的脚本
+            proguardFiles  'proguard-rules.txt'
         }
     }
+
 
     compileOptions{//兼容java8语法
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -24,14 +32,22 @@ android {
     }
 }
 
+task test1{
+    print rootProject.ext.minSdkVersion
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation rootProject.lib_appcompat
     implementation rootProject.lib_constraint_layout
+//    implementation "androidx.lifecycle"
+
 
     testImplementation rootProject.lib_junit
     testImplementation rootProject.lib_junit_ext
     androidTestImplementation rootProject.lib_espresso_core
+
+
 
 //    依赖的lib库
 //    api是被依赖的模块修改，所有模块都重新编译

@@ -1,0 +1,14 @@
+#暴力keep,相当于没混淆
+#-keep class package.name.**{*;}
+
+#activity需声明在manifest中，故activity必须keep住，抽取基础类keep
+-keep public class * extends android.app.Activity
+
+#使用反射技术的时候，需要做对应的keep
+
+#parcelable的子类和creator静态成员变量不混淆，否则产生BadParcelableException
+-keep class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+#eventBus相关的混淆
