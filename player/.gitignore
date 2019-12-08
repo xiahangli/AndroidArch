@@ -1,1 +1,39 @@
+#项目构建产生的文件
 /build
+
+#generated文件夹
+bin/
+gen/
+out/
+
+#java class 文件
+*.class
+
+
+
+#IntelliJ 配置文件
+*.iml
+.idea/*
+.idea/workspace.xml
+.idea/task.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+idea/caches
+
+#Freeline android平台秒级编译方案
+freeline.py
+freeline/
+freeline_project_description.json
+
+#android studio导航编辑器临时文件
+.navigation/
+
+#本地配置文件 sdk路径等
+local.properties
+
+#fastlane 自动打包框架
+fastlane/report.xml
+fastlane/Preview.html
+
+

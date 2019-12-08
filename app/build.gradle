@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion "29.0.0"
     defaultConfig {
         applicationId "com.example.arch"
-        minSdkVersion 17
-        targetSdkVersion 29
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -53,5 +53,5 @@ dependencies {
 //    api是被依赖的模块修改，所有模块都重新编译
     api project(':base')
     api project(':common')
-    api project(':player')
+//    api project(':player')
 }
