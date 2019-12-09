@@ -22,8 +22,8 @@ public class VideoPlayerViewHolder extends RecyclerView.ViewHolder {
     /**
      * 包级别访问权限，也即VideoPlayerViewHolder与访问他的类需要在同一个包名下
      */
-    FrameLayout mediaContainer;
-    TextView title;
+    FrameLayout playerContainer;
+    TextView titleView;
     ImageView thumbnail, volumeControl;
     ProgressBar progressBar;
     View itemView;
@@ -32,21 +32,21 @@ public class VideoPlayerViewHolder extends RecyclerView.ViewHolder {
     public VideoPlayerViewHolder(@NonNull View itemView) {
         super(itemView);
         this.itemView = itemView;
-        mediaContainer = itemView.findViewById(R.id.media_container);
+        playerContainer = itemView.findViewById(R.id.media_container);
         thumbnail = itemView.findViewById(R.id.thumbnail);
-        title = itemView.findViewById(R.id.title);
+        titleView = itemView.findViewById(R.id.title_view);
         progressBar = itemView.findViewById(R.id.progressBar);
         volumeControl = itemView.findViewById(R.id.volume_control);
     }
 
 
-    public void onBindViewHolder(MediaObject mediaObject, RequestManager requestManager) {
+    public void onBindViewHolder(@NonNull MediaObject mediaObject, RequestManager requestManager) {
         ObjectUtils.requireNonNull(requestManager, "RequestManager is null");
         this.requestManager = requestManager;
         //这里为itemView设置了一个tag标记，
         //后面在滑动recyclerview需要播放特定播放器的时候根据itemView拿到tag标记的ViewHolder
         itemView.setTag(this);
-        title.setText(mediaObject.getTitle());
+        titleView.setText(mediaObject.getTitle());
         //glide加载封面
         this.requestManager
                 .load(mediaObject.getThumbnail())

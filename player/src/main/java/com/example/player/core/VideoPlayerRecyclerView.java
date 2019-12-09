@@ -17,8 +17,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;
 import com.example.player.model.MediaObject;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -44,7 +51,7 @@ public class VideoPlayerRecyclerView extends RecyclerView {
     private ImageView thumbnail, volumeControl;
     private ProgressBar progressBar;
     private View itemView;//当前itemView
-    private FrameLayout mediaContainer;//playerVIew的父容器
+    private FrameLayout playerContainer;//当前playerView的父容器
     private PlayerView playerView;//全局一个PlayerView组件,默认是使用SurfaceView作为视图展示组件
     private SimpleExoPlayer player;
 
@@ -54,8 +61,8 @@ public class VideoPlayerRecyclerView extends RecyclerView {
     private int screenDefaultHeight = 0;//屏幕高度
     private Context context;
     private int playPosition = -1;//全局记录当前正在播放的item位置
-    private boolean isVideoViewAdded;
-    private RequestManager requestManager;
+    private boolean isPlayerViewAdded;
+    //private RequestManager requestManager;
     private String TAG = "VideoPlayerRecyclerView";
 
     public VideoPlayerRecyclerView(@NonNull Context context) {
@@ -66,30 +73,17 @@ public class VideoPlayerRecyclerView extends RecyclerView {
         super(context, attrs);
         this.context = context.getApplicationContext();
         playerView = new PlayerView(this.context);
+        //创建播放器,其中的大部分设置都是使用默认的，如DefaultTrackSelector
+        player = ExoPlayerFactory.newSimpleInstance(context);
+
         //设置尺寸模式
         playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_ZOOM);
-
+        playerView.setUseController(true);
         //监听滑动的状态改变，在state_idle的时候，即The RecyclerView is not currently scrolling.
-        addOnScrollListener(new OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == SCROLL_STATE_IDLE) {
-                    Log.d(TAG, "onScrollStateChanged: called.");
-                    if (thumbnail != null) { // show the old thumbnail
-                        thumbnail.setVisibility(VISIBLE);
-                    }
-
-                    //处理滑到最上面和最下面的边界case
-                    if (!recyclerView.canScrollVertically(1)) {
-                        Log.d(TAG, "onScrollStateChanged: cannot go down");
-                        playVideo(true);
-                    } else {
-                        playVideo(false);
-                    }
-                }
-            }
-        });
+        addOnScrollListener(onScrollChangeListener);
+        player.addListener(eventListener);
+        //添加子视图的界面显示状态监听，在播放视频的item移除窗口时，从recyclerview中移除播放器视图
+        addOnChildAttachStateChangeListener(onChildAttachStateChangeListener);
     }
 
 
@@ -127,20 +121,19 @@ public class VideoPlayerRecyclerView extends RecyclerView {
         //先移除后添加
         if (playerView != null) {//videoSurfaceView不应该为null
             playerView.setVisibility(INVISIBLE);
-            removeVideoView(playerView);//将playerview从
+            removePlayerView();//将playerview从recyclerview中移除
         }
 
         //得到item,以及更新recyclerview保存的当前item的组件的引用
         int firstVisibleItemPosition = ((LinearLayoutManager) getLayoutManager()).findFirstVisibleItemPosition();
         int childPosition = targetPosition - firstVisibleItemPosition;
-        if (childPosition <= 0) return;//异常
         View item = getChildAt(childPosition);//得到播放的item
         if(item == null)return;//异常
         VideoPlayerViewHolder viewHolder = (VideoPlayerViewHolder) item.getTag();
         if (viewHolder == null)return;//异常
         thumbnail = viewHolder.thumbnail;//更新recyclerview中当前播放器正在播放的item的封面
-        mediaContainer = viewHolder.mediaContainer;//playerview的父容器
-        requestManager = viewHolder.requestManager;//加载图片的请求管理器
+        playerContainer = viewHolder.playerContainer;//playerview的父容器
+        //requestManager = viewHolder.requestManager;//加载图片的请求管理器
         itemView = viewHolder.itemView;//
         progressBar = viewHolder.progressBar;//界面加载时候的圆形进度条
 
@@ -158,26 +151,46 @@ public class VideoPlayerRecyclerView extends RecyclerView {
             ProgressiveMediaSource progressiveMediaSource = factory.createMediaSource(mediaUri);//ProgressiveMediaSource与exoplayer组件绑定
             player.prepare(progressiveMediaSource);//ExoPlayer开始准备MediaSource
             player.setPlayWhenReady(true);//设置PlayerWhenReady变量，当准备ok的时候开始自动播放
-            if (!isVideoViewAdded) {
 
-            }
         }
     }
 
     /**
-     * 从recycler中移除playerview
-     *
-     * @param videoSurfaceView playerview组件
+     * 将itemview恢复成默认的样子，包括移除playerView,各种播放器相关状态变量复原
      */
-    private void removeVideoView(PlayerView videoSurfaceView) {
-        ViewGroup parent = (ViewGroup) videoSurfaceView.getParent();
+    private void resetPlayerView(){
+        if (isPlayerViewAdded){//添加过则移除playerView
+            removePlayerView();
+            playPosition = -1;
+            thumbnail.setVisibility(VISIBLE);
+            playerView.setVisibility(INVISIBLE);//将组件隐藏
+        }
+    }
+
+
+    /**
+     * 从recycler中移除playerview
+     */
+    private void removePlayerView() {
+        ViewGroup parent = (ViewGroup) playerView.getParent();
         if (parent == null) return;
-        int indexOfPlayerView = parent.indexOfChild(videoSurfaceView);
+        int indexOfPlayerView = parent.indexOfChild(playerView);
         if (indexOfPlayerView >= 0) {
             parent.removeViewAt(indexOfPlayerView);//从父容器中移除playerview组件
-            videoSurfaceView.setVisibility(INVISIBLE);//蒋组件隐藏
-            isVideoViewAdded = false;//标记playerview没有添加到rv中
+            isPlayerViewAdded = false;//标记playerview没有添加到rv中
         }
+    }
+
+    /**
+     * 添加videoview到recyclerview中
+     */
+    private void addVideoView() {
+        //addView之前都是移除过的
+        playerContainer.addView(playerView);
+        playerView.setVisibility(VISIBLE);
+        isPlayerViewAdded = true;
+        thumbnail.setVisibility(GONE);
+
     }
 
 
@@ -221,6 +234,126 @@ public class VideoPlayerRecyclerView extends RecyclerView {
         }
         itemView = null;
     }
+
+    private OnChildAttachStateChangeListener onChildAttachStateChangeListener = new OnChildAttachStateChangeListener() {
+        @Override
+        public void onChildViewAttachedToWindow(@NonNull View view) {
+
+        }
+
+        /**
+         *item移出窗口的时候会回调,view是移除的item
+         */
+        @Override
+        public void onChildViewDetachedFromWindow(@NonNull View view) {
+            if(itemView!=null&&itemView.equals(view)){//当前正在播放的视频移出窗口了
+                resetPlayerView();//那么将播放器视图移出recyclerview,并设置不可见
+            }
+        }
+    };
+
+    /**
+     * 监听用户滑动行为
+     */
+    private OnScrollListener onScrollChangeListener = new OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            if (newState == SCROLL_STATE_IDLE) {
+                Log.d(TAG, "onScrollStateChanged: called.");
+                if (thumbnail != null) { // show the old thumbnail
+                    thumbnail.setVisibility(VISIBLE);
+                }
+
+                //处理滑到最上面和最下面的边界case
+                if (!recyclerView.canScrollVertically(1)) {
+                    Log.d(TAG, "onScrollStateChanged: cannot go down");
+                    playVideo(true);
+                } else {
+                    playVideo(false);
+                }
+            }
+        }
+    };
+
+    private Player.EventListener eventListener = new Player.EventListener() {
+        @Override
+        public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
+
+        }
+
+        @Override
+        public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray
+        trackSelections) {
+
+        }
+
+        @Override
+        public void onLoadingChanged(boolean isLoading) {
+
+        }
+
+        @Override
+        public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+            switch (playbackState) {//根据播放状态改变UI
+                case Player.STATE_BUFFERING:
+                    Log.e(TAG, "onPlayerStateChanged: Buffering video.");
+                    if (progressBar != null) {
+                        progressBar.setVisibility(VISIBLE);
+                    }
+
+                    break;
+                case Player.STATE_ENDED://播放完成seek到起始位置
+                    Log.d(TAG, "onPlayerStateChanged: Video ended.");
+                    player.seekTo(0);
+                    break;
+                case Player.STATE_IDLE:
+
+                    break;
+                case Player.STATE_READY://添加playerview视图到item
+                    Log.e(TAG, "onPlayerStateChanged: Ready to play.");
+                    if (progressBar != null) {
+                        progressBar.setVisibility(GONE);
+                    }
+                    if(!isPlayerViewAdded){
+                        addVideoView();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        @Override
+        public void onRepeatModeChanged(int repeatMode) {
+
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+        }
+
+        @Override
+        public void onPlayerError(ExoPlaybackException error) {
+
+        }
+
+        @Override
+        public void onPositionDiscontinuity(int reason) {
+
+        }
+
+        @Override
+        public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+        }
+
+        @Override
+        public void onSeekProcessed() {
+
+        }
+    };
 
 
 }
