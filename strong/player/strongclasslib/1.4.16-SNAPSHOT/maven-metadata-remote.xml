@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.strong.player</groupId>
+  <artifactId>strongclasslib</artifactId>
+  <version>1.4.16-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20190404.094051</timestamp>
+      <buildNumber>1</buildNumber>
+    </snapshot>
+    <lastUpdated>20190404094051</lastUpdated>
+  </versioning>
+</metadata>

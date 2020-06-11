@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.strong.mcmake</groupId>
+  <artifactId>microcoursemakelib</artifactId>
+  <version>1.4.17-SNAPSHOT</version>
+  <versioning>
+    <snapshot>
+      <timestamp>20190404.093233</timestamp>
+      <buildNumber>2</buildNumber>
+    </snapshot>
+    <lastUpdated>20190404093233</lastUpdated>
+  </versioning>
+</metadata>
